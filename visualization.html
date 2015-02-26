@@ -20,12 +20,12 @@ svg { border: solid black 1px; }
 
 
 <script>
-var svg_h = 400
-var svg_w = 800
-var season_length = 10
-var buffer = 40
+var svg_h = 400;
+var svg_w = 800;
+var season_length = 10;
+var buffer = 40;
 var episodes;
-
+var ep_death_qual = [];
 d3.json("episode_info.json", function (error, data) {
     episodes = data
     
@@ -35,15 +35,24 @@ d3.json("episode_info.json", function (error, data) {
         function(d){return d.rating});
     var range_rating = max_rating - min_rating;
     
-    var num_eps = episodes.length
+    var num_eps = episodes.length;
+
+    episodes.forEach(function(e){
+        e.deaths.forEach(function(d){
+            ep_death_qual[ep_death_qual.length] = 
+                {"episode":e.episode,"mentions":d.mentions}})});
     
     //scales
     var rating_scale = d3.scale.linear()
-        .domain([min_rating-(range_rating/4),max_rating+(range_rating/4)])
-        .range([buffer,svg_w-buffer]);
-    
+        .domain([min_rating-range_rating/4,10])
+        .range([svg_h-buffer,buffer]);
+
     var episode_scale = d3.scale.linear()
         .domain([0,num_eps])
+        .range([buffer,svg_w-buffer]);
+    
+    var mention_scale = d3.scale.linear()
+        .domain([0,0.2])
         .range([svg_h-buffer,buffer]);
     
     //svg
@@ -52,12 +61,32 @@ d3.json("episode_info.json", function (error, data) {
         .attr("width",svg_w);
     
     //axes
-    svg.append("xax").attr("class","axis")
-        .attr("transform","translate(0,"+(svg_w-buffer)+")")
+    var xAxis = d3.svg.axis().scale(episode_scale).orient("bottom");
+    var yAxis = d3.svg.axis().scale(rating_scale).orient("left");
+    svg.append("g").attr("class","axis")
+        .attr("transform","translate(0,"+(svg_h-buffer)+")")
         .call(xAxis);
-    svg.append("yax").attr("class","axis")
+    svg.append("g").attr("class","axis")
         .attr("transform","translate(" +buffer+",0)")
         .call(yAxis);
+    
+    
+    //rating line
+    var line = d3.svg.line()
+        .x(function(d){return episode_scale(d.episode);})
+        .y(function(d){return rating_scale(d.rating);});
+    
+    svg.append("path").attr("d",line(episodes)).
+        style("fill","none").style("stroke","black")
+    
+    //mentions circles
+    var circles=svg.selectAll("circle").data(ep_death_qual).enter().append("circle");
+    
+    circles.attr("cx",function(d){return episode_scale(d.episode)})
+        .attr("cy",function(d){return mention_scale(d.mentions)})
+        .attr("r",5)
+        .attr("opacity",0.3);
+    
     
     
     
