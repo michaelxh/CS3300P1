@@ -1,0 +1,68 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+svg { border: solid black 1px; }
+/* The default styles for axis elements stink. What should they be? */
+.axis path { fill: none; stroke: #777; }
+.axis line { stroke: #777; }
+</style>
+</head>
+<body>
+
+
+<!-- The SVG element will go in here -->
+<div id="canvas"></div>
+
+
+<script>
+var svg_h = 400
+var svg_w = 800
+var season_length = 10
+var buffer = 40
+var episodes;
+
+d3.json("episode_info.json", function (error, data) {
+    episodes = data
+    
+    var min_rating = d3.min(episodes,
+        function(d){return d.rating});
+    var max_rating = d3.max(episodes,
+        function(d){return d.rating});
+    var range_rating = max_rating - min_rating;
+    
+    var num_eps = episodes.length
+    
+    //scales
+    var rating_scale = d3.scale.linear()
+        .domain([min_rating-(range_rating/4),max_rating+(range_rating/4)])
+        .range([buffer,svg_w-buffer]);
+    
+    var episode_scale = d3.scale.linear()
+        .domain([0,num_eps])
+        .range([svg_h-buffer,buffer]);
+    
+    //svg
+    var svg = d3.select("#canvas").append("svg")
+        .attr("height",svg_h)
+        .attr("width",svg_w);
+    
+    //axes
+    svg.append("xax").attr("class","axis")
+        .attr("transform","translate(0,"+(svg_w-buffer)+")")
+        .call(xAxis);
+    svg.append("yax").attr("class","axis")
+        .attr("transform","translate(" +buffer+",0)")
+        .call(yAxis);
+    
+    
+    
+});
+</script>
+
+</body>
+</html>
