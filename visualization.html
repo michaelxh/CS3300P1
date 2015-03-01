@@ -23,7 +23,7 @@ svg { border: solid black 1px; }
 var svg_h = 400;
 var svg_w = 800;
 var season_length = 10;
-var buffer = 40;
+var buffer = 60;
 var episodes;
 var ep_death_qual = [];
 d3.json("episode_info.json", function (error, data) {
@@ -70,7 +70,38 @@ d3.json("episode_info.json", function (error, data) {
         .attr("transform","translate(" +buffer+",0)")
         .call(yAxis);
     
-    
+    //background rects to differentiate seasons
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#ab9367")
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer +(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#6c2c23")
+    svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer + 2*(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#212250")
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer + 3*(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#7b906f")
+	
+	//bar representation for data
+	//bar.append("rect")
+    //  .attr("y", function(d) { return y(d.rating); })
+    //  .attr("height", function(d) { return svg_h - y(d.rating); })
+    //  .attr("width", barWidth - 1);
+	
     //rating line
     var line = d3.svg.line()
         .x(function(d){return episode_scale(d.episode);})
@@ -87,9 +118,14 @@ d3.json("episode_info.json", function (error, data) {
         .attr("r",5)
         .attr("opacity",0.3);
     
-    
-    
-    
+    //label y axis
+	svg.append("text")
+		.attr("class", "y label")
+		.attr("text-anchor", "end")
+		.attr("y", 6)
+		.attr("dy", ".75em")
+		.attr("transform", "rotate(-90)")
+		.text("Viewers (in millions)");
 });
 </script>
 
