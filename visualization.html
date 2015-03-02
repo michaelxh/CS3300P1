@@ -30,9 +30,15 @@ var buffer = 100;
 var episodes;
 var death_quality = [];
 var screen_time;
-    
+var affiliations;
+
 d3.json("screen_time_info.json",function(error, data){
     screen_time = data;
+})
+
+d3.json("affiliations.json", function(error, data) {
+	affiliations = data;
+	console.log(affiliations);
 })
 
 d3.json("episode_info.json", function (error, data) {
