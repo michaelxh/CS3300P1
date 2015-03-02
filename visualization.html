@@ -4,9 +4,13 @@
 <!-- Load the d3 library. -->
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <style>
+@font-face {
+    font-family: GameOfThrones;
+    src: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/29725/got.ttf);
+}
 /* put a border around the svg element so we can see the coordinate system better. */
 body { font-family: "Open Sans"; } div { margin: 30px; }
-svg { border: solid black 1px; }
+svg {border: solid black 1px}
 /* The default styles for axis elements stink. What should they be? */
 .axis path { fill: none; stroke: #777; }
 .axis line { stroke: #777; }
@@ -20,12 +24,20 @@ svg { border: solid black 1px; }
 
 
 <script>
-var svg_h = 400;
-var svg_w = 800;
+var svg_h = 500;
+var svg_w = 900;
 var season_length = 10;
-var buffer = 40;
+var top_buffer =100;
+var buffer = 50;
 var episodes;
-var ep_death_qual = [];
+var death_quality = [];
+var screen_time;
+
+    
+d3.json("screen_time_info.json",function(error, data){
+    screen_time = data;
+})
+
 d3.json("episode_info.json", function (error, data) {
     episodes = data
     
@@ -36,61 +48,140 @@ d3.json("episode_info.json", function (error, data) {
     var range_rating = max_rating - min_rating;
     
     var num_eps = episodes.length;
-
+    
     episodes.forEach(function(e){
         e.deaths.forEach(function(d){
-            ep_death_qual[ep_death_qual.length] = 
-                {"episode":e.episode,"mentions":d.mentions}})});
-    
+            if (d.name in screen_time){
+                death_quality[death_quality.length] = 
+                    {"episode":e.episode,"time":screen_time[d.name].time/e.time}
+                console.log(d.name)
+            }
+        })
+    });
+        
+    var max_time = d3.max(death_quality,
+        function(d){return d.time});
+
     //scales
     var rating_scale = d3.scale.linear()
         .domain([min_rating-range_rating/4,10])
-        .range([svg_h-buffer,buffer]);
+        .range([svg_h-buffer,top_buffer]);
 
     var episode_scale = d3.scale.linear()
-        .domain([0,num_eps])
+        .domain([1,num_eps])
         .range([buffer,svg_w-buffer]);
     
-    var mention_scale = d3.scale.linear()
-        .domain([0,0.2])
-        .range([svg_h-buffer,buffer]);
+    var time_scale = d3.scale.linear()
+        .domain([0,max_time])
+        .range([svg_h-buffer,top_buffer]);
+
+    /*
+    var season_scale = d3.scale.ordinal()
+        .domain(["S1","S2","S3","S4"])
+        .rangeBands([buffer,svg_w-buffer])
+    */
     
     //svg
     var svg = d3.select("#canvas").append("svg")
         .attr("height",svg_h)
         .attr("width",svg_w);
     
+    //season labels
+    d3.range(1,5).forEach(function(d){
+        svg.append("text").attr("x",function(e){return episode_scale(d*10-10+5)}).attr("y",top_buffer-10)
+            .text(function(e){return "S"+d})
+    })
+    
+    //defs
+    /*
+    var defs = svg.append("defs")
+    
+    var patterns = defs.append("pattern").attr("id","image").
+    attr("x","-0.44").attr("y","0")
+    .attr("patternUnits","userSpaceOnUs")
+    .attr("height","80").attr("width","80")
+    .append("image").attr("x","0").attr("y","0")
+    .attr("height","80").attr("width","80")
+        .attr("xlink:href","http://img2.wikia.nocookie.net/__cb20110626030942/gameofthrones/images/thumb/9/9c/EddardStark.jpg/250px-EddardStark.jpg")
+                                            
+    //patterns
+    */
     //axes
-    var xAxis = d3.svg.axis().scale(episode_scale).orient("bottom");
-    var yAxis = d3.svg.axis().scale(rating_scale).orient("left");
+    xAxis = d3.svg.axis().scale(episode_scale).orient("bottom").outerTickSize("0").tickValues([1,5,10,15,20,25,30,35,40]);
+    yAxis = d3.svg.axis().scale(rating_scale).orient("left").outerTickSize("0");
+    timeAxis = d3.svg.axis().scale(time_scale).orient("right").outerTickSize("0");
+    
     svg.append("g").attr("class","axis")
         .attr("transform","translate(0,"+(svg_h-buffer)+")")
         .call(xAxis);
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(" +buffer+",0)")
+        .attr("transform","translate(" +(buffer-5)+",0)")
         .call(yAxis);
+    svg.append("g").attr("class","axis")
+        .attr("transform","translate(" +(svg_w-buffer+5)+")")
+        .call(timeAxis);
+    //season rectangles
     
+    var rects = svg.selectAll("rect")
+        .data([0.75,season_length+0.75, season_length*2+0.75, season_length*3+0.75]).enter().append("rect");
     
+    rects.attr("x",function(d){return episode_scale(d)}).attr("y",rating_scale(10)-10)
+        .attr("width",function(d){return (episode_scale(d+9.5)-episode_scale(d))})
+        .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
+        .attr("rx","2")
+        .attr("ry","2")
+        .style("fill","##909090").style("opacity","0.05")
+                        //function(d){episode_scale(d+10)-episode_scale(d)}      
+                        //rating_scale(0)-rating_scale(10)
     //rating line
-    var line = d3.svg.line()
-        .x(function(d){return episode_scale(d.episode);})
-        .y(function(d){return rating_scale(d.rating);});
+    var seasons = [[],[],[],[]]
+    episodes.forEach(function(e){
+        switch (Math.floor((e.episode-1)/10)){
+            case 0:
+                seasons[0][seasons[0].length] = e;
+                break;
+            case 1:
+                seasons[1][seasons[1].length] = e;
+                break;
+            case 2:
+                seasons[2][seasons[2].length] = e;
+                break;
+            case 3:
+                seasons[3][seasons[3].length] = e;
+                break;
+        }
+    })
+    seasons.forEach(function(s){
+        var line = d3.svg.line()
+            .x(function(d){return episode_scale(d.episode);})
+            .y(function(d){return rating_scale(d.rating);})
+            .interpolate("linear");
+
+        svg.append("path").attr("d",line(s))
+            .style("fill","none").style("stroke","black").style("stroke-width","2")
+    })
+        
     
-    svg.append("path").attr("d",line(episodes)).
-        style("fill","none").style("stroke","black")
-    
-    //mentions circles
-    var circles=svg.selectAll("circle").data(ep_death_qual).enter().append("circle");
+    //screen time circles
+    var circles=svg.selectAll("circle").data(death_quality).enter().append("circle");
     
     circles.attr("cx",function(d){return episode_scale(d.episode)})
-        .attr("cy",function(d){return mention_scale(d.mentions)})
+        .attr("cy",function(d){return time_scale(d.time)})
         .attr("r",5)
         .attr("opacity",0.3);
+   
+    /*
+    svg.append("circle").attr("cx","100")
+    .attr("cy","100").attr("r","20").style("fill","url(#image)");
+    */
     
     
-    
-    
+    //title
+    svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/2).text("Game of Thrones")
+        .attr("font-family","GameOfThrones").attr("text-anchor","middle")
+        .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
 });
+
 </script>
 
 </body>
