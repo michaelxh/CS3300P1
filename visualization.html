@@ -10,10 +10,11 @@
 }
 /* put a border around the svg element so we can see the coordinate system better. */
 body { font-family: "Open Sans"; } div { margin: 30px; }
-svg {border: solid black 1px}
+//svg {border: solid black 1px}
 /* The default styles for axis elements stink. What should they be? */
 .axis path { fill: none; stroke: #777; }
 .axis line { stroke: #777; }
+.axis text 
 </style>
 </head>
 <body>
@@ -24,11 +25,11 @@ svg {border: solid black 1px}
 
 
 <script>
-var svg_h = 500;
-var svg_w = 900;
+var svg_h = 700;
+var svg_w = 1100;
 var season_length = 10;
-var top_buffer =100;
-var buffer = 60;
+var top_buffer =120;
+var buffer = 100;
 var episodes;
 var death_quality = [];
 var screen_time;
@@ -88,7 +89,7 @@ d3.json("episode_info.json", function (error, data) {
     
     //season labels
     d3.range(1,5).forEach(function(d){
-        svg.append("text").attr("x",function(e){return episode_scale(d*10-10+5)}).attr("y",top_buffer-10)
+        svg.append("text").attr("x",function(e){return episode_scale(d*10-10+5)}).attr("y",top_buffer-11)
             .text(function(e){return "S"+d})
     })
     
@@ -107,53 +108,58 @@ d3.json("episode_info.json", function (error, data) {
     //patterns
     */
     //axes
-    xAxis = d3.svg.axis().scale(episode_scale).orient("bottom").outerTickSize("0").tickValues([1,5,10,15,20,25,30,35,40]);
+    xAxis = d3.svg.axis().scale(episode_scale).orient("bottom").outerTickSize("0")
+        .tickValues([1,5,10,15,20,25,30,35,40]);
     yAxis = d3.svg.axis().scale(rating_scale).orient("left").outerTickSize("0");
+    
     timeAxis = d3.svg.axis().scale(time_scale).orient("right").outerTickSize("0");
     
     svg.append("g").attr("class","axis")
         .attr("transform","translate(0,"+(svg_h-buffer)+")")
         .call(xAxis);
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(" +(buffer-5)+",0)")
+        .attr("transform","translate(" +(buffer-8)+",0)")
         .call(yAxis);
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(" +(svg_w-buffer+5)+")")
+        .attr("transform","translate(" +(svg_w-buffer+8)+")")
         .call(timeAxis);
     //season rectangles
+        
+    var rects = svg.selectAll("rect")
+        .data([0.75,season_length+0.75, season_length*2+0.75,season_length*3+0.75])
+        .enter().append("rect");
     
-    //background rects to differentiate seasons
-	svg.append("rect")
-        .attr("y", buffer)
-        .attr("x", buffer)
-        .attr("width", (svg_w-2*buffer)/4)
-        .attr("height", svg_h -buffer*2)
-        .attr("fill", "#ab9367")
-	svg.append("rect")
-        .attr("y", buffer)
-        .attr("x", buffer +(svg_w-2*buffer)/4)
-        .attr("width", (svg_w-2*buffer)/4)
-        .attr("height", svg_h -buffer*2)
-        .attr("fill", "#6c2c23")
-    svg.append("rect")
-        .attr("y", buffer)
-        .attr("x", buffer + 2*(svg_w-2*buffer)/4)
-        .attr("width", (svg_w-2*buffer)/4)
-        .attr("height", svg_h -buffer*2)
-        .attr("fill", "#212250")
-	svg.append("rect")
-        .attr("y", buffer)
-        .attr("x", buffer + 3*(svg_w-2*buffer)/4)
-        .attr("width", (svg_w-2*buffer)/4)
-        .attr("height", svg_h -buffer*2)
-        .attr("fill", "#7b906f")
+    rects.attr("x",function(d){return episode_scale(d)}).attr("y",rating_scale(10)-10)
+        .attr("width",function(d){return (episode_scale(d+9.5)-episode_scale(d))})
+        .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
+        .attr("rx","2")
+        .attr("ry","2")
+        .style("opacity","0.5")
+        .style("fill",function(d){
+            switch (Math.floor(d/10)){
+                case 0:
+                    return "#ab9367";
+                    break;
+                case 1:
+                    return "#6c2c23";
+                    break;
+                case 2:
+                    return "#212250";
+                    break;
+                case 3:
+                    return "#7b906f";
+                    break;
+            }
+        });
 	
-	//bar representation for data
+    
+    //bar representation for data
 	//bar.append("rect")
     //  .attr("y", function(d) { return y(d.rating); })
     //  .attr("height", function(d) { return svg_h - y(d.rating); })
     //  .attr("width", barWidth - 1);
     //rating line
+    
     var seasons = [[],[],[],[]]
     episodes.forEach(function(e){
         switch (Math.floor((e.episode-1)/10)){
@@ -187,8 +193,8 @@ d3.json("episode_info.json", function (error, data) {
     
     circles.attr("cx",function(d){return episode_scale(d.episode)})
         .attr("cy",function(d){return time_scale(d.time)})
-        .attr("r",5)
-        .attr("opacity",0.3);
+        .attr("r",7)
+        .attr("opacity",0.5);
    
     /*
     svg.append("circle").attr("cx","100")
@@ -197,17 +203,29 @@ d3.json("episode_info.json", function (error, data) {
     
     
     //title
-    svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/2).text("Game of Thrones")
+    svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/2)
+        .text("Game  of  Thrones  Ratings  and  Important  Deaths")
+        .attr("xml:space", "preserve")
         .attr("font-family","GameOfThrones").attr("text-anchor","middle")
         .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
-    //label y axis
-	svg.append("text")
-		.attr("class", "y label")
-		.attr("text-anchor", "end")
-		.attr("y", 6)
-		.attr("dy", ".75em")
-		.attr("transform", "rotate(-90)")
-		.text("Viewers (in millions)");
+    
+    //labels
+    
+    svg.append("text").attr("x",buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
+        .text("IMDB Rating")
+        .attr("text-anchor","middle").attr("alignment-baseline","middle")
+        .attr("transform","rotate(-90,"+buffer/4+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
+    
+    svg.append("text").attr("x",svg_w/2).attr("y",svg_h-buffer/2).text("Episodes")
+        .attr("text-anchor","middle").attr("alignment-baseline","middle");
+    
+    svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
+        .text("Screen Time (mins)")
+        .attr("text-anchor","middle").attr("alignment-baseline","middle")
+        .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
+    
+    
+        
 });
 
 </script>
