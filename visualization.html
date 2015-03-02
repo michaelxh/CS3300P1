@@ -18,11 +18,8 @@ body { font-family: "Open Sans"; } div { margin: 30px; }
 </style>
 </head>
 <body>
-
-
 <!-- The SVG element will go in here -->
 <div id="canvas"></div>
-
 
 <script>
 var svg_h = 700;
@@ -33,14 +30,20 @@ var buffer = 100;
 var episodes;
 var death_quality = [];
 var screen_time;
+var affiliations;    
 
-    
 d3.json("screen_time_info.json",function(error, data){
     screen_time = data;
 })
 
+
+d3.json("affiliations.json", function(error, data){
+	affiliations = data;
+})
+
+
 d3.json("episode_info.json", function (error, data) {
-    episodes = data
+    episodes = data;
     
     var min_rating = d3.min(episodes,
         function(d){return d.rating});
@@ -146,14 +149,6 @@ d3.json("episode_info.json", function (error, data) {
                     break;
             }
         });
-	
-    
-    //bar representation for data
-	//bar.append("rect")
-    //  .attr("y", function(d) { return y(d.rating); })
-    //  .attr("height", function(d) { return svg_h - y(d.rating); })
-    //  .attr("width", barWidth - 1);
-    //rating line
     
     var seasons = [[],[],[],[]]
     episodes.forEach(function(e){
@@ -184,6 +179,16 @@ d3.json("episode_info.json", function (error, data) {
         
     
     //screen time circles
+	var house_colors={
+		'stark':'#c4c4c2',
+		'nights watch':'#3c3c3c',
+		'the thirteen':'#66943b',
+		'lannister':'#cfaa82',
+		'baratheon':'#dca717',
+		'targaryen':'#a9301e',
+		'wildlings':'#710554'
+	};
+	
     var circles=svg.selectAll("circle").data(death_quality).enter().append("circle");
     
     circles.attr("cx",function(d){return episode_scale(d.episode)})
@@ -196,7 +201,7 @@ d3.json("episode_info.json", function (error, data) {
     .attr("cy","100").attr("r","20").style("fill","url(#image)");
     */
     
-    
+    b
     //title
     svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/5)
         .text("Game  of  Thrones")
