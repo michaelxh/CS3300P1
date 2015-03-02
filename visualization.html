@@ -54,7 +54,7 @@ d3.json("episode_info.json", function (error, data) {
         e.deaths.forEach(function(d){
             if (d.name in screen_time){
                 death_quality[death_quality.length] = 
-                    {"episode":e.episode,"time":screen_time[d.name].time/e.time}
+                    {"episode":e.episode,"time":screen_time[d.name].time}
                 console.log(d.name)
             }
         })
@@ -73,7 +73,7 @@ d3.json("episode_info.json", function (error, data) {
         .range([buffer,svg_w-buffer]);
     
     var time_scale = d3.scale.linear()
-        .domain([0,max_time])
+        .domain([0,100])
         .range([svg_h-buffer,top_buffer]);
 
     /*
@@ -118,23 +118,25 @@ d3.json("episode_info.json", function (error, data) {
         .attr("transform","translate(0,"+(svg_h-buffer)+")")
         .call(xAxis);
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(" +(buffer-8)+",0)")
+        .attr("transform","translate(" +(buffer-13)+",0)")
         .call(yAxis);
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(" +(svg_w-buffer+8)+")")
+        .attr("transform","translate(" +(svg_w-buffer+13)+")")
         .call(timeAxis);
     //season rectangles
         
     var rects = svg.selectAll("rect")
-        .data([0.75,season_length+0.75, season_length*2+0.75,season_length*3+0.75])
+        .data([0.60,season_length+0.60, season_length*2+0.60,season_length*3+0.60])
         .enter().append("rect");
     
     rects.attr("x",function(d){return episode_scale(d)}).attr("y",rating_scale(10)-10)
-        .attr("width",function(d){return (episode_scale(d+9.5)-episode_scale(d))})
+        .attr("width",function(d){
+            return episode_scale(d+9.8)-episode_scale(d);    
+            })
         .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
-        .attr("rx","2")
-        .attr("ry","2")
-        .style("opacity","0.5")
+        .attr("rx","7")
+        .attr("ry","7")
+        .style("opacity","0.65")
         .style("fill",function(d){
             switch (Math.floor(d/10)){
                 case 0:
@@ -203,12 +205,18 @@ d3.json("episode_info.json", function (error, data) {
     
     
     //title
-    svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/2)
-        .text("Game  of  Thrones  Ratings  and  Important  Deaths")
+    svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/5)
+        .text("Game  of  Thrones")
         .attr("xml:space", "preserve")
         .attr("font-family","GameOfThrones").attr("text-anchor","middle")
         .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
     
+    svg.append("text").attr("x",svg_w/2).attr("y",3*top_buffer/5)
+        .text("Ratings  and  Character  Screen  Time  At  Death")
+        .attr("xml:space", "preserve")
+        .attr("font-family","GameOfThrones").attr("text-anchor","middle")
+        .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
+
     //labels
     
     svg.append("text").attr("x",buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
@@ -220,7 +228,7 @@ d3.json("episode_info.json", function (error, data) {
         .attr("text-anchor","middle").attr("alignment-baseline","middle");
     
     svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
-        .text("Screen Time (mins)")
+        .text("Cumulative Screen Time at Death (mins)")
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
         .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
     
