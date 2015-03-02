@@ -12,8 +12,8 @@
 body { font-family: "Open Sans"; } div { margin: 30px; }
 //svg {border: solid black 1px}
 /* The default styles for axis elements stink. What should they be? */
-.axis path { fill: none; stroke: #777; }
-.axis line { stroke: #777; }
+.axis path { fill: none; stroke: black; }
+.axis line { stroke: black; }
 .axis text 
 </style>
 </head>
@@ -136,7 +136,7 @@ d3.json("episode_info.json", function (error, data) {
         .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
         .attr("rx","7")
         .attr("ry","7")
-        .style("opacity","0.65")
+        .style("opacity","0.3")
         .style("fill",function(d){
             switch (Math.floor(d/10)){
                 case 0:
@@ -186,7 +186,7 @@ d3.json("episode_info.json", function (error, data) {
             .interpolate("linear");
 
         svg.append("path").attr("d",line(s))
-            .style("fill","none").style("stroke","black").style("stroke-width","2")
+            .style("fill","none").style("stroke","black").style("stroke-width","2.8")
     })
         
     
