@@ -224,7 +224,7 @@ d3.json("episode_info.json", function (error, data) {
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
         .attr("transform","rotate(-90,"+buffer/4+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
     
-    svg.append("text").attr("x",svg_w/2).attr("y",svg_h-buffer/2).text("Episodes")
+    svg.append("text").attr("x",svg_w/2).attr("y",svg_h-buffer/2).text("Episode")
         .attr("text-anchor","middle").attr("alignment-baseline","middle");
     
     svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
