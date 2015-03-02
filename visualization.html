@@ -18,11 +18,8 @@ body { font-family: "Open Sans"; } div { margin: 30px; }
 </style>
 </head>
 <body>
-
-
 <!-- The SVG element will go in here -->
 <div id="canvas"></div>
-
 
 <script>
 var svg_h = 700;
@@ -33,7 +30,6 @@ var buffer = 100;
 var episodes;
 var death_quality = [];
 var screen_time;
-
     
 d3.json("screen_time_info.json",function(error, data){
     screen_time = data;
@@ -153,14 +149,6 @@ d3.json("episode_info.json", function (error, data) {
                     break;
             }
         });
-	
-    
-    //bar representation for data
-	//bar.append("rect")
-    //  .attr("y", function(d) { return y(d.rating); })
-    //  .attr("height", function(d) { return svg_h - y(d.rating); })
-    //  .attr("width", barWidth - 1);
-    //rating line
     
     var seasons = [[],[],[],[]]
     episodes.forEach(function(e){
