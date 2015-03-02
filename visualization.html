@@ -28,7 +28,7 @@ var svg_h = 500;
 var svg_w = 900;
 var season_length = 10;
 var top_buffer =100;
-var buffer = 50;
+var buffer = 60;
 var episodes;
 var death_quality = [];
 var screen_time;
@@ -122,17 +122,37 @@ d3.json("episode_info.json", function (error, data) {
         .call(timeAxis);
     //season rectangles
     
-    var rects = svg.selectAll("rect")
-        .data([0.75,season_length+0.75, season_length*2+0.75, season_length*3+0.75]).enter().append("rect");
-    
-    rects.attr("x",function(d){return episode_scale(d)}).attr("y",rating_scale(10)-10)
-        .attr("width",function(d){return (episode_scale(d+9.5)-episode_scale(d))})
-        .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
-        .attr("rx","2")
-        .attr("ry","2")
-        .style("fill","##909090").style("opacity","0.05")
-                        //function(d){episode_scale(d+10)-episode_scale(d)}      
-                        //rating_scale(0)-rating_scale(10)
+    //background rects to differentiate seasons
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#ab9367")
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer +(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#6c2c23")
+    svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer + 2*(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#212250")
+	svg.append("rect")
+        .attr("y", buffer)
+        .attr("x", buffer + 3*(svg_w-2*buffer)/4)
+        .attr("width", (svg_w-2*buffer)/4)
+        .attr("height", svg_h -buffer*2)
+        .attr("fill", "#7b906f")
+	
+	//bar representation for data
+	//bar.append("rect")
+    //  .attr("y", function(d) { return y(d.rating); })
+    //  .attr("height", function(d) { return svg_h - y(d.rating); })
+    //  .attr("width", barWidth - 1);
     //rating line
     var seasons = [[],[],[],[]]
     episodes.forEach(function(e){
@@ -180,6 +200,14 @@ d3.json("episode_info.json", function (error, data) {
     svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/2).text("Game of Thrones")
         .attr("font-family","GameOfThrones").attr("text-anchor","middle")
         .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
+    //label y axis
+	svg.append("text")
+		.attr("class", "y label")
+		.attr("text-anchor", "end")
+		.attr("y", 6)
+		.attr("dy", ".75em")
+		.attr("transform", "rotate(-90)")
+		.text("Viewers (in millions)");
 });
 
 </script>
