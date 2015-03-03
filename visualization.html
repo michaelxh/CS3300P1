@@ -193,7 +193,8 @@ d3.json("episode_info.json", function (error, data) {
 		'baratheon':'#dca717',
 		'targaryen':'#a9301e',
 		'wildlings':'#710554', 
-		'': '#ff11ff' //pink
+		//'': '#ff11ff' //pink
+		'': 'white'
 	};	
 	
     var circles=svg.selectAll("circle").data(death_quality).enter().append("circle");
@@ -226,7 +227,6 @@ d3.json("episode_info.json", function (error, data) {
         .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
 
     //labels
-    
     svg.append("text").attr("x",buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
         .text("IMDB Rating")
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
@@ -238,10 +238,7 @@ d3.json("episode_info.json", function (error, data) {
     svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
         .text("Cumulative Screen Time at Death (mins)")
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
-        .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
-    
-    
-        
+        .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")"); 
 });
 
 </script>
