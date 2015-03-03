@@ -250,9 +250,9 @@ d3.json("episode_info.json", function (error, data) {
             .attr("alignment-baseline","middle");
         count += 1;
     });
-    svg.append("rect").attr("height",top_buffer-20).attr("width",svg_w/6).attr("x",svg_w*(6/7))
-        .attr("y",5)
-    
+    svg.append("rect").attr("height",top_buffer-24).attr("width",svg_w/7).attr("x",svg_w*(8.4/10))
+        .attr("y",5).style("opacity","0.1").attr("rx",7).attr("ry",7);
+
         
 });
 
