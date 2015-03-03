@@ -52,13 +52,12 @@ d3.json("episode_info.json", function (error, data) {
     var range_rating = max_rating - min_rating;
     
     var num_eps = episodes.length;
-    
+	
     episodes.forEach(function(e){
         e.deaths.forEach(function(d){
             if (d.name in screen_time){
                 death_quality[death_quality.length] = 
-                    {"episode":e.episode,"time":screen_time[d.name].time}
-                console.log(d.name)
+                    {"episode":e.episode,"time":screen_time[d.name].time,"name":d.name}
             }
         })
     });
@@ -139,7 +138,7 @@ d3.json("episode_info.json", function (error, data) {
         .attr("height",rating_scale(min_rating-0.43)-rating_scale(10)+10)
         .attr("rx","7")
         .attr("ry","7")
-        .style("opacity","0.3")
+        .style("opacity","0.15")
         .style("fill",function(d){
             switch (Math.floor(d/10)){
                 case 0:
@@ -193,22 +192,26 @@ d3.json("episode_info.json", function (error, data) {
 		'lannister':'#cfaa82',
 		'baratheon':'#dca717',
 		'targaryen':'#a9301e',
-		'wildlings':'#710554'
-	};
+		'wildlings':'#710554', 
+		'': '#ff11ff' //pink
+	};	
 	
     var circles=svg.selectAll("circle").data(death_quality).enter().append("circle");
-    
+	
     circles.attr("cx",function(d){return episode_scale(d.episode)})
         .attr("cy",function(d){return time_scale(d.time)})
+		.attr("fill", function(d){
+				return house_colors[affiliations[d.name]];
+			})
+		.attr("stroke","#444444")
         .attr("r",7)
-        .attr("opacity",0.5);
-   
+        .attr("opacity",.8);
+    
     /*
     svg.append("circle").attr("cx","100")
     .attr("cy","100").attr("r","20").style("fill","url(#image)");
     */
     
-    b
     //title
     svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/5)
         .text("Game  of  Thrones")
