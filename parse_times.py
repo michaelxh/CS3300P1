@@ -5,9 +5,13 @@ for l in f:
     n = l[0:l.find('-')-1]
     t = int(l[l.find('-')+1:l.find(':')])
     t += int(l[l.find(':')+1:l.find(':')+3])/60.0
-    s = l[l.find('('):l.find(';')].split(',')
+    s = l[l.find('(')+1:l.find(';')].split(',')
     e = int(l[l.find(';')+2:l.find(')')])
-    dict[n] = {'time':t,'seasons':s,'episodes':e}
+    if (l.find("[") == -1):    
+        h = ""
+    else:
+        h = l[l.find("[")+1:l.find("]")]
+    dict[n] = {'time':t,'seasons':s,'episodes':e,'house':h}
 to_write = open('screen_time_info.json','wb')
 to_write.write(json.dumps(dict))
 f.close()

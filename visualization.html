@@ -25,7 +25,8 @@ body { font-family: "Open Sans"; } div { margin: 30px; }
 var svg_h = 700;
 var svg_w = 1100;
 var season_length = 10;
-var top_buffer =120;
+var top_buffer =150;
+var bottom_buffer = 100;
 var buffer = 100;
 var episodes;
 var death_quality = [];
@@ -57,7 +58,7 @@ d3.json("episode_info.json", function (error, data) {
         e.deaths.forEach(function(d){
             if (d.name in screen_time){
                 death_quality[death_quality.length] = 
-                    {"episode":e.episode,"time":screen_time[d.name].time}
+                    {"episode":e.episode,"time":screen_time[d.name].time,"house":screen_time[d.name].house}
             }
         })
     });
@@ -68,7 +69,7 @@ d3.json("episode_info.json", function (error, data) {
     //scales
     var rating_scale = d3.scale.linear()
         .domain([min_rating-range_rating/4,10])
-        .range([svg_h-buffer,top_buffer]);
+        .range([svg_h-bottom_buffer,top_buffer]);
 
     var episode_scale = d3.scale.linear()
         .domain([1,num_eps])
@@ -76,7 +77,7 @@ d3.json("episode_info.json", function (error, data) {
     
     var time_scale = d3.scale.linear()
         .domain([0,110])
-        .range([svg_h-buffer,top_buffer]);
+        .range([svg_h-bottom_buffer,top_buffer]);
     
     //svg
     var svg = d3.select("#canvas").append("svg")
@@ -111,7 +112,7 @@ d3.json("episode_info.json", function (error, data) {
     timeAxis = d3.svg.axis().scale(time_scale).orient("right").outerTickSize("0");
     
     svg.append("g").attr("class","axis")
-        .attr("transform","translate(0,"+(svg_h-buffer)+")")
+        .attr("transform","translate(0,"+(svg_h-bottom_buffer)+")")
         .call(xAxis);
     svg.append("g").attr("class","axis")
         .attr("transform","translate(" +(buffer-13)+",0)")
@@ -180,28 +181,31 @@ d3.json("episode_info.json", function (error, data) {
     
     //screen time circles
 	var house_colors={
-		'stark':'#c4c4c2',
-		'nights watch':'#3c3c3c',
-		'the thirteen':'#66943b',
-		'lannister':'#cfaa82',
-		'baratheon':'#dca717',
-		'targaryen':'#a9301e',
-		'wildlings':'#710554'
+		"Stark":"#9F9F9F",
+		"Night's Watch":"#3c3c3c",
+		"Lannister":"#FFD700",
+		"Targaryen":"#D23818",
+        "Baratheon":"#66943B",
+        "Wilding":"#003366",
+        "other":"#0000CD"
 	};
-	
+    
     var circles=svg.selectAll("circle").data(death_quality).enter().append("circle");
     
     circles.attr("cx",function(d){return episode_scale(d.episode)})
         .attr("cy",function(d){return time_scale(d.time)})
         .attr("r",7)
-        .attr("opacity",0.5);
-   
+        .attr("opacity",0.8)
+        .attr("fill",function(d) {var h = d.house; return house_colors[h]})
+        .attr("stroke","black")
+        .attr("stroke-width","2px");
+            
+    
     /*
     svg.append("circle").attr("cx","100")
     .attr("cy","100").attr("r","20").style("fill","url(#image)");
     */
     
-    b
     //title
     svg.append("text").attr("x",svg_w/2).attr("y",top_buffer/5)
         .text("Game  of  Thrones")
@@ -213,23 +217,41 @@ d3.json("episode_info.json", function (error, data) {
         .text("Ratings  and  Character  Screen  Time  At  Death")
         .attr("xml:space", "preserve")
         .attr("font-family","GameOfThrones").attr("text-anchor","middle")
-        .attr("alignment-baseline","middle").attr("font-size",top_buffer/5+"px");
+        .attr("alignment-baseline","middle").attr("font-size",top_buffer/7+"px");
 
     //labels
     
-    svg.append("text").attr("x",buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
+    svg.append("text").attr("x",buffer/4).attr("y",(svg_h-bottom_buffer-top_buffer)/2+top_buffer)
         .text("IMDB Rating")
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
-        .attr("transform","rotate(-90,"+buffer/4+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
+        .attr("transform","rotate(-90,"+buffer/4+","+((svg_h-bottom_buffer-top_buffer)/2+top_buffer)+")");
     
-    svg.append("text").attr("x",svg_w/2).attr("y",svg_h-buffer/2).text("Episode")
+    svg.append("text").attr("x",svg_w/2).attr("y",svg_h-bottom_buffer/2).text("Episode")
         .attr("text-anchor","middle").attr("alignment-baseline","middle");
     
-    svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-buffer-top_buffer)/2+top_buffer)
+    svg.append("text").attr("x",svg_w-buffer/4).attr("y",(svg_h-bottom_buffer-top_buffer)/2+top_buffer)
         .text("Cumulative Screen Time at Death (mins)")
         .attr("text-anchor","middle").attr("alignment-baseline","middle")
-        .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-buffer-top_buffer)/2+top_buffer)+")");
+        .attr("transform","rotate(90,"+(svg_w-buffer/4)+","+((svg_h-bottom_buffer-top_buffer)/2+top_buffer)+")");
     
+    //legend
+    var count = 1;
+    var houses = ["Baratheon","Lannister","Night's Watch","Stark","Targaryen","Wilding","other"]
+    houses.forEach(function(h){
+        svg.append("circle").attr("cy",top_buffer/(houses.length+2)*count)
+            .attr("cx",svg_w*(6/7))
+            .attr("r",7)
+            .attr("opacity",0.8)
+            .attr("fill",house_colors[h])
+            .attr("stroke","black")
+            .attr("stroke-width","2px");
+        svg.append("text").attr("x",svg_w*(7/8)).attr("y",top_buffer/(houses.length+2)*count+3)
+            .text(h)
+            .attr("alignment-baseline","middle");
+        count += 1;
+    });
+    svg.append("rect").attr("height",top_buffer-20).attr("width",svg_w/6).attr("x",svg_w*(6/7))
+        .attr("y",5)
     
         
 });
